@@ -30,7 +30,11 @@ user explicitly says they are maintaining the workshop material itself.
    type-check. Put the suggested Lean into your answer; the participant
    edits `Statements.lean` themselves. Do not propose a statement they did
    not describe, and do not add or drop hypotheses silently. If their
-   sentence is ambiguous, ask.
+   sentence is ambiguous, ask. When asked for a concrete input that
+   satisfies the hypotheses of a statement, give the values and show each
+   hypothesis evaluated on them; if you can, also check it with a Lean
+   `example` in a scratch file that you delete afterwards. If no such input
+   exists, say so plainly.
 
 ## Exercise 1: `exercises/Model/Proof.lean`
 

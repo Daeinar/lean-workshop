@@ -125,9 +125,16 @@ agent. `make check` covers items 1 to 3.
    (explained at the end of the exercises). `sorryAx` means a hidden `sorry`.
    `Lean.ofReduceBool` means `native_decide`. Anything else is an axiom the
    LLM added.
-4. **The hypotheses are satisfiable.** Write down one concrete input that
-   meets all hypotheses. A theorem whose hypotheses never hold is true and
-   worthless.
+4. **The hypotheses are satisfiable.** A theorem whose hypotheses can never
+   all hold at once is true and worthless, and the LLM will prove it without
+   complaint. So pick concrete values for the variables of your statement
+   (a hash function, a specific list of leaves, a specific index) and check
+   that every hypothesis is true for them. The easiest way is to ask the LLM:
+   "Give me one concrete input that satisfies all hypotheses of
+   `<name of your statement>`, and show me each hypothesis evaluated on it."
+   Read the answer and judge it yourself. If no such input exists, or the only
+   ones are absurd, the hypotheses are wrong. Each exercise below names a
+   suitable input.
 5. **The conclusion is as strong as you meant.** Typical weak spots: "if
    `f x` returns `p` then `P p`" is satisfied for free when `f x` fails,
    whereas "`f x` returns some `p` and `P p`" is not; "the result is not the
@@ -195,8 +202,11 @@ workflow and the syntax are familiar before exercises 2 to 4.
    again.
 
 4. Ask the LLM to prove exercise 1, run `make check`, and go through the
-   checklist. For item 4, the test from step 3 becomes one Lean line that
-   applies the proved theorem to the example tree:
+   checklist. For item 4, a suitable input is `toyHash`, `exampleLeaves` and
+   index `2`: the only hypothesis is `2 < exampleLeaves.length`, true because
+   the example has five leaves. In Lean this check is the following line,
+   which applies the proved theorem to those values; the LLM can write it for
+   you and run it:
 
    ```lean
    example : ∃ p, (build toyHash exampleLeaves).getProof 2 = .ok p ∧
@@ -236,7 +246,8 @@ In this exercise we prove that building a tree from no leaves gives the root
 is about getting used to the translated code.
 
 Write `EmptyRootStatement`. Express "no leaves" as the hypothesis
-`leaves.val = []`.
+`leaves.val = []`. Checklist item 4: any hash function and the empty list of
+leaves.
 
 ### Exercise 3: An out-of-bounds proof request fails
 
@@ -248,8 +259,9 @@ three. The statement holds for all of them, because `get_proof` checks the
 index before it touches `nodes`.
 
 Write `OutOfBoundsStatement`, quantifying over every value of type
-`MerkleTree`, not only over trees that came out of the builder. Once it is
-proved, ask yourself whether the converse holds: does an in-bounds index
+`MerkleTree`, not only over trees that came out of the builder. Checklist
+item 4: a tree with `n_leaves` equal to 3 and the index 3. Once it is proved,
+ask yourself whether the converse holds: does an in-bounds index
 always give `Ok`? For an arbitrary record it does not, because with
 inconsistent `nodes` and `n_leaves` the indexing panics. That direction needs
 a tree that was actually built, which is exercise 4.
@@ -286,9 +298,12 @@ Write `RoundtripStatement`. Expect two rounds with the LLM:
 If the hints do not land, unpack the solutions with `make solutions` and read
 `solutions/AeneasSolution/Proofs.lean`.
 
-Two notes for the checklist. In exercises 3 and 4, `#print axioms` lists
+Checklist item 4: five leaves and the index 2. Both hypotheses, the index
+bound and the size bound, are small arithmetic facts; if the size bound turns
+out to be impossible to satisfy for small inputs, it was written the wrong
+way round.
+
+A note for checklist item 3. In exercises 3 and 4, `#print axioms` lists
 `Aeneas.Std.core.fmt.Formatter`. This is the Aeneas library's placeholder for
 Rust's `Formatter` type, reached through the `format!` in `get_proof`'s error
-message; it is a type, not a proposition, and the check allows it. For item 4
-there is no `#eval` here: write the concrete input down and prove the bounds
-with `decide` or `omega`.
+message; it is a type, not a proposition, and the check allows it.
